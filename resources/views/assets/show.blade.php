@@ -21,7 +21,7 @@
         </div>
     </x-slot>
 
-    <div class="py-8 bg-gray-50 dark:bg-gray-800 min-h-screen">
+    <div class="py-8 bg-blue-50 dark:bg-blue-900 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col lg:flex-row gap-6">
                 <!-- Left Sidebar: Asset Details -->
