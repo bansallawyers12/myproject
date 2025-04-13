@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const entityId = this.documentData.dataset.entityId;
             const entityName = this.documentData.dataset.entityName;
+            const assetId = this.documentData.dataset.assetId;
 
             if (!entityId || !entityName) {
                 this.filesContainer.innerHTML = `
@@ -60,10 +61,18 @@ document.addEventListener('DOMContentLoaded', function() {
             const formData = new FormData();
             formData.append('business_entity_id', entityId);
             formData.append('business_entity_name', entityName);
+            if (assetId) {
+                formData.append('asset_id', assetId);
+            }
 
             const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-            fetch("/documents/fetch-files", {
+            // Determine the correct endpoint based on whether we have an asset ID
+            const endpoint = assetId 
+                ? `/business-entities/${entityId}/assets/${assetId}/documents/fetch`
+                : `/business-entities/${entityId}/documents/fetch`;
+
+            fetch(endpoint, {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -102,7 +111,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                         </div>
                     `).join('');
-
                     this.filesContainer.innerHTML = filesHtml;
 
                     // Add click handlers to the new document links
@@ -134,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
+                console.error('Error fetching documents:', error);
                 this.filesContainer.innerHTML = `
                     <div class="text-center p-4 text-red-500">
                         <p>Error loading documents: ${error.message}</p>

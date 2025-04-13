@@ -551,29 +551,38 @@
                                         @csrf
                                         <input type="hidden" name="business_entity_id" value="{{ $businessEntity->id }}">
                                         <div class="mb-4">
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Reminder</label>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
+                                            <input type="text" name="title" class="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:text-white" required>
+                                            @error('title') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                        </div>
+                                        <div class="mb-4">
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Content</label>
                                             <textarea name="content" class="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:text-white" rows="3" required>{{ old('content') }}</textarea>
                                             @error('content') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                                         </div>
                                         <div class="mb-4">
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Due Date</label>
-                                            <input type="date" name="next_due_date" class="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:text-white" min="{{ now()->format('Y-m-d') }}" value="{{ old('next_due_date') }}" required>
-                                            @error('next_due_date') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                            <input type="date" name="reminder_date" class="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:text-white" min="{{ now()->format('Y-m-d') }}" value="{{ old('reminder_date') }}" required>
+                                            @error('reminder_date') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                                         </div>
                                         <div class="mb-4">
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Repeat</label>
-                                            <select name="repeat_type" id="repeat_type" class="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:text-white">
-                                                <option value="none">One-off (No repeat)</option>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Repeat Type</label>
+                                            <select name="repeat_type" class="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:text-white" required>
+                                                <option value="none">No Repeat</option>
                                                 <option value="monthly">Monthly</option>
                                                 <option value="quarterly">Quarterly</option>
                                                 <option value="annual">Annual</option>
                                             </select>
                                             @error('repeat_type') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                                         </div>
-                                        <div class="mb-4" id="repeat_end_date_container" style="display: none;">
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">End Date (Optional)</label>
-                                            <input type="date" name="repeat_end_date" class="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:text-white" min="{{ now()->format('Y-m-d') }}" value="{{ old('repeat_end_date') }}">
-                                            @error('repeat_end_date') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                        <div class="mb-4">
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Priority</label>
+                                            <select name="priority" class="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:text-white" required>
+                                                <option value="low">Low</option>
+                                                <option value="medium">Medium</option>
+                                                <option value="high">High</option>
+                                            </select>
+                                            @error('priority') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                                         </div>
                                         <div class="flex justify-end">
                                             <button type="submit" class="inline-flex items-center px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-md shadow-sm transition duration-200">
@@ -599,7 +608,7 @@
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                             </svg>
-                                                            Due: {{ $reminder->next_due_date ? $reminder->next_due_date->format('d/m/Y') : 'N/A' }}
+                                                            Due: {{ $reminder->reminder_date ? $reminder->reminder_date->format('d/m/Y') : 'N/A' }}
                                                         </span>
                                                         @if($reminder->repeat_type && $reminder->repeat_type !== 'none')
                                                             <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">

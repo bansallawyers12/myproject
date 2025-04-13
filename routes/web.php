@@ -136,6 +136,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/documents', 'index')->name('documents.index');
         Route::get('/documents/proxy', 'proxyFile')->name('documents.proxy');
 
+        // Business Entity document routes
+        Route::post('/business-entities/{businessEntity}/documents/fetch', 'fetchFiles')->name('business-entities.documents.fetch');
+
         // Asset-specific document routes
         Route::post('/business-entities/{businessEntity}/assets/{asset}/documents/fetch', 'fetchAssetFiles')->name('asset-documents.fetchAssetFiles');
         Route::post('/business-entities/{businessEntity}/assets/{asset}/documents/delete', [DocumentController::class, 'deleteFile'])->name('asset-documents.delete');

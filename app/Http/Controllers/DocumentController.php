@@ -136,7 +136,9 @@ class DocumentController extends Controller
             $businessEntity = BusinessEntity::findOrFail($businessEntityId);
             $this->authorize('view', $businessEntity);
 
+            // Only fetch documents that are not associated with any asset
             $documents = Document::where('business_entity_id', $businessEntityId)
+                ->whereNull('asset_id')  // Add this condition to exclude asset documents
                 ->orderBy('created_at', 'desc')
                 ->get();
 
@@ -456,6 +458,12 @@ class DocumentController extends Controller
             Log::error('Error in previewDocument:', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Failed to generate preview'], 500);
         }
+    }
+
+    public function showUploadForm(BusinessEntity $businessEntity)
+    {
+        $this->authorize('update', $businessEntity);
+        return view('business-entities.upload-document', compact('businessEntity'));
     }
 }
 
