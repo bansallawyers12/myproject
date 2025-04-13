@@ -1176,6 +1176,24 @@ class BusinessEntityController extends Controller
         return redirect()->back()->with('error', 'No valid reminder date to extend.');
     }
 
+    /**
+     * Delete a note from a business entity.
+     *
+     * @param  \App\Models\BusinessEntity  $businessEntity
+     * @param  \App\Models\Note  $note
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function destroyNote(BusinessEntity $businessEntity, Note $note)
+    {
+        // Verify the note belongs to the business entity
+        if ($note->business_entity_id !== $businessEntity->id) {
+            return redirect()->back()->with('error', 'Invalid note.');
+        }
+
+        $note->delete();
+        return redirect()->back()->with('success', 'Note deleted successfully.');
+    }
+
     // --- Helper Methods ---
 
     /**

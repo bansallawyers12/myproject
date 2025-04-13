@@ -604,10 +604,23 @@
                                         <div class="space-y-4">
                                             @foreach ($asset->notes->where('is_reminder', false) as $note)
                                                 <div class="bg-white dark:bg-gray-900 p-4 rounded-lg shadow-md transition-all duration-200 hover:shadow-lg">
-                                                    <p class="text-gray-700 dark:text-gray-200">{{ $note->content }}</p>
-                                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                                                        Added by {{ $note->user->name ?? 'Unknown' }} on {{ $note->created_at ? $note->created_at->format('d/m/Y H:i') : 'N/A' }}
-                                                    </p>
+                                                    <div class="flex justify-between items-start">
+                                                        <div class="flex-grow">
+                                                            <p class="text-gray-700 dark:text-gray-200">{{ $note->content }}</p>
+                                                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                                                                Added by {{ $note->user->name ?? 'Unknown' }} on {{ $note->created_at ? $note->created_at->format('d/m/Y H:i') : 'N/A' }}
+                                                            </p>
+                                                        </div>
+                                                        <form action="{{ route('business-entities.assets.notes.destroy', [$businessEntity->id, $asset->id, $note->id]) }}" method="POST" class="ml-4">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300" onclick="return confirm('Are you sure you want to delete this note?')">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                </svg>
+                                                            </button>
+                                                        </form>
+                                                    </div>
                                                 </div>
                                             @endforeach
                                         </div>
@@ -775,10 +788,8 @@
                 }
             }
 
-            // Call this function when the page loads
-            document.addEventListener('DOMContentLoaded', function() {
-                initializeReminderLogic();
-            });
+            // Call the function directly
+            initializeReminderLogic();
 
             // Document upload and preview functionality
             const documentData = document.getElementById('document-data');
