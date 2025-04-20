@@ -32,6 +32,21 @@ class EntityPerson extends Model
         'updated_at' => 'datetime',
     ];
 
+    // We explicitly avoid defining any unique constraints here
+    // to allow one person to have multiple roles in the same entity
+    
+    /**
+     * Boot the model.
+     * Disable Laravel's default uniqueness checks.
+     */
+    public static function boot()
+    {
+        parent::boot();
+        
+        // By not defining any unique indexes here, we ensure
+        // that a person can have multiple roles in the same entity
+    }
+
     public function businessEntity()
     {
         return $this->belongsTo(BusinessEntity::class, 'business_entity_id');

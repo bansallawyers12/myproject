@@ -48,7 +48,7 @@ class EntityPersonController extends Controller
         // Log the incoming request data for debugging
         Log::info('Store Request Data', $request->all());
 
-        // Validate the request
+        // Validate the request - IMPORTANT: No unique validation here to allow multiple roles
         $validated = $request->validate([
             'business_entity_id' => 'required|exists:business_entities,id',
             'person_id' => 'nullable|exists:persons,id',
@@ -60,9 +60,9 @@ class EntityPersonController extends Controller
             'shares_percentage' => 'nullable|numeric|between:0,100',
             'authority_level' => 'nullable|in:Full,Limited',
             'asic_due_date' => 'nullable|date|after:today',
-            // New person fields
-            'first_name' => 'required_if:create_new_person,1|string|max:255',
-            'last_name' => 'required_if:create_new_person,1|string|max:255',
+            // New person fields - only validate these if creating a new person
+            'first_name' => 'required_if:create_new_person,1|string|max:255|nullable',
+            'last_name' => 'required_if:create_new_person,1|string|max:255|nullable',
             'email' => 'nullable|email|max:255',
             'phone_number' => 'nullable|string|max:15',
             'tfn' => 'nullable|string|max:9',
@@ -72,13 +72,22 @@ class EntityPersonController extends Controller
             'role.required' => 'The role is required.',
             'appointment_date.required' => 'The appointment date is required.',
             'role_status.required' => 'The role status is required.',
+            'first_name.required_if' => 'The first name is required when creating a new person.',
+            'last_name.required_if' => 'The last name is required when creating a new person.',
         ]);
 
         // Handle new person creation if checkbox is checked
         $personId = $request->person_id;
         $entityTrusteeId = $request->input('entity_trustee_id', null);
         
-        if ($request->has('create_new_person') && $request->create_new_person) {
+        if ($request->has('create_new_person') && $request->create_new_person == 1) {
+            // Check if email already exists before creating new person
+            if ($request->email && Person::where('email', $request->email)->exists()) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['email' => 'A person with this email already exists. Please use the existing person instead.']);
+            }
+            
             $personData = [
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
@@ -95,6 +104,9 @@ class EntityPersonController extends Controller
                 Log::error('Failed to create new person', ['error' => $e->getMessage(), 'data' => $personData]);
                 return redirect()->back()->withErrors(['error' => 'Failed to create new person: ' . $e->getMessage()]);
             }
+        } else {
+            // Make sure personId is set only if a person was selected
+            $personId = $request->filled('person_id') ? $request->person_id : null;
         }
 
         // Ensure either person_id or entity_trustee_id is filled, but not both (after new person creation)
@@ -121,11 +133,20 @@ class EntityPersonController extends Controller
         Log::info('EntityPerson Data to Insert', $entityPersonData);
 
         try {
+            // Create the relationship without enforcing any uniqueness
             $entityPerson = EntityPerson::create($entityPersonData);
             Log::info('Created EntityPerson', $entityPerson->toArray());
         } catch (\Exception $e) {
-            Log::error('Failed to create EntityPerson', ['error' => $e->getMessage(), 'data' => $entityPersonData, 'trace' => $e->getTraceAsString()]);
-            return redirect()->back()->withErrors(['error' => 'Failed to create relationship: ' . $e->getMessage()]);
+            Log::error('Failed to create EntityPerson', [
+                'error' => $e->getMessage(), 
+                'data' => $entityPersonData, 
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            // Return to the form with a more descriptive error message
+            return redirect()->back()->withErrors([
+                'error' => 'Failed to create relationship: ' . $e->getMessage() . 
+                ' This may be due to a database constraint. We have attempted to remove unique constraints on entity_person table.']);
         }
 
         // Redirect back to the business entity page

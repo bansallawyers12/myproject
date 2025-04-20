@@ -25,6 +25,9 @@ return new class extends Migration
                 $table->timestamps();
 
                 $table->foreign('person_id')->references('id')->on('persons')->onDelete('cascade');
+                
+                // Note: We intentionally do not add unique constraints here
+                // to allow a person to have multiple roles in the same entity
             });
         }
     }

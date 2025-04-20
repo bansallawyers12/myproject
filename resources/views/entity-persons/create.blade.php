@@ -9,6 +9,20 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
+                    @if ($errors->any())
+                        <div class="mb-4 p-4 bg-red-100 text-red-700 border border-red-300 rounded">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <div class="mb-4 p-4 bg-blue-100 text-blue-700 border border-blue-300 rounded">
+                        <p><strong>Note:</strong> You can assign multiple roles to the same person. For example, a person can be both a Director and a Shareholder.</p>
+                    </div>
+
                     <form method="POST" action="{{ route('entity-persons.store') }}">
                         @csrf
                         <div class="mb-4">
@@ -27,7 +41,7 @@
                         <!-- Existing Person Selection -->
                         <div id="existing_person" class="mb-4">
                             <label for="person_id" class="block text-sm font-medium text-gray-700">Select Existing Person</label>
-                            <select name="person_id" id="person_id" class="mt-1 block w-full border-gray-300 rounded-md" required>
+                            <select name="person_id" id="person_id" class="mt-1 block w-full border-gray-300 rounded-md">
                                 <option value="">Select a person</option>
                                 @foreach ($persons as $person)
                                     <option value="{{ $person->id }}">{{ $person->first_name }} {{ $person->last_name }}</option>
@@ -72,7 +86,7 @@
 
                         <div class="mb-4">
                             <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
-                            <select name="role" id="role" class="mt-1 block w-full border-gray-300 rounded-md" required>
+                            <select name="role" id="role" class="mt-1 block w-full border-gray-300 rounded-md">
                                 <option value="">Select Role</option>
                                 <option value="Director">Director</option>
                                 <option value="Secretary">Secretary</option>
@@ -86,7 +100,7 @@
                         </div>
                         <div class="mb-4">
                             <label for="appointment_date" class="block text-sm font-medium text-gray-700">Appointment Date</label>
-                            <input type="date" name="appointment_date" id="appointment_date" class="mt-1 block w-full border-gray-300 rounded-md" required value="{{ old('appointment_date') }}">
+                            <input type="date" name="appointment_date" id="appointment_date" class="mt-1 block w-full border-gray-300 rounded-md" value="{{ old('appointment_date') ?? now()->format('Y-m-d') }}">
                             @error('appointment_date') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>
                         <div class="mb-4">
@@ -96,7 +110,7 @@
                         </div>
                         <div class="mb-4">
                             <label for="role_status" class="block text-sm font-medium text-gray-700">Role Status</label>
-                            <select name="role_status" id="role_status" class="mt-1 block w-full border-gray-300 rounded-md" required>
+                            <select name="role_status" id="role_status" class="mt-1 block w-full border-gray-300 rounded-md">
                                 <option value="Active" {{ old('role_status') == 'Active' ? 'selected' : '' }}>Active</option>
                                 <option value="Resigned" {{ old('role_status') == 'Resigned' ? 'selected' : '' }}>Resigned</option>
                             </select>
@@ -136,21 +150,45 @@
             const personId = document.getElementById('person_id');
             const firstName = document.getElementById('first_name');
             const lastName = document.getElementById('last_name');
+            const email = document.getElementById('email');
 
             if (checkbox.checked) {
                 existingPerson.classList.add('hidden');
                 newPersonFields.classList.remove('hidden');
-                personId.removeAttribute('required');
                 personId.value = '';
-                firstName.setAttribute('required', 'required');
-                lastName.setAttribute('required', 'required');
+                
+                // Clear any error messages that might be visible
+                const errorMessages = document.querySelectorAll('.text-red-500');
+                errorMessages.forEach(message => {
+                    if (message.textContent.includes('person')) {
+                        message.textContent = '';
+                    }
+                });
             } else {
                 existingPerson.classList.remove('hidden');
                 newPersonFields.classList.add('hidden');
-                personId.setAttribute('required', 'required');
-                firstName.removeAttribute('required');
-                lastName.removeAttribute('required');
+                
+                // Clear new person fields when switching back to existing person
+                if (firstName) firstName.value = '';
+                if (lastName) lastName.value = '';
+                if (email) email.value = '';
+                
+                // Clear any error messages related to new person fields
+                const errorMessages = document.querySelectorAll('.text-red-500');
+                errorMessages.forEach(message => {
+                    if (message.textContent.includes('name') || message.textContent.includes('email')) {
+                        message.textContent = '';
+                    }
+                });
             }
         }
+
+        // Set default date to today if not set
+        document.addEventListener('DOMContentLoaded', function() {
+            const appointmentDate = document.getElementById('appointment_date');
+            if (!appointmentDate.value) {
+                appointmentDate.value = new Date().toISOString().split('T')[0];
+            }
+        });
     </script>
 </x-app-layout>
